@@ -4,6 +4,7 @@
  */
 
 import { useState, FormEvent, ChangeEvent } from 'react';
+import { useMicrophone } from '../contexts/MicrophoneContext';
 import './ApiKeyInput.css';
 
 interface ApiKeyInputProps {
@@ -13,8 +14,10 @@ interface ApiKeyInputProps {
 const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
+  const [isRequesting, setIsRequesting] = useState(false);
+  const { setMicrophoneStream, setMicrophoneGranted } = useMicrophone();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!apiKey.trim()) {
@@ -27,26 +30,36 @@ const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
       return;
     }
 
-    // Check if microphone API is available
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.warn('Microphone API not available, proceeding without mic test');
-      setError('');
-      onApiKeySubmit(apiKey.trim());
-      return;
-    }
+    setIsRequesting(true);
+    setError('');
 
-    // Test microphone permissions before proceeding
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        // Stop the stream immediately as we're just testing permission
-        stream.getTracks().forEach(track => track.stop());
-        setError('');
+    try {
+      // Request microphone permission immediately during user gesture
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setMicrophoneStream(stream);
+        setMicrophoneGranted(true);
+        console.log('Microphone permission granted and stream stored');
+      } else {
+        console.warn('Microphone API not available');
+        setMicrophoneGranted(false);
+      }
+      
+      // Proceed with API key submission
+      onApiKeySubmit(apiKey.trim());
+      
+    } catch (err) {
+      console.error('Microphone permission error:', err);
+      setError('Microphone permission was denied. You can still use the app but voice chat will not work.');
+      setMicrophoneGranted(false);
+      
+      // Still proceed with API key submission even if mic fails
+      setTimeout(() => {
         onApiKeySubmit(apiKey.trim());
-      })
-      .catch((err) => {
-        console.error('Microphone permission error:', err);
-        setError('Microphone permission is required for voice chat. Please allow microphone access and try again.');
-      });
+      }, 2000);
+    } finally {
+      setIsRequesting(false);
+    }
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -76,8 +89,8 @@ const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
             {error && <span className="error-message">{error}</span>}
           </div>
           
-          <button type="submit" className="submit-btn">
-            Start Chatting
+          <button type="submit" className="submit-btn" disabled={isRequesting}>
+            {isRequesting ? 'Setting up...' : 'Start Chatting (& Enable Mic)'}
           </button>
         </form>
         

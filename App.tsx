@@ -27,6 +27,7 @@ import KeynoteCompanion from './components/demo/keynote-companion/KeynoteCompani
 import Header from './components/Header';
 import UserSettings from './components/UserSettings';
 import { LiveAPIProvider } from './contexts/LiveAPIContext';
+import { MicrophoneProvider } from './contexts/MicrophoneContext';
 import { useUI } from './lib/state';
 
 /**
@@ -36,35 +37,39 @@ import { useUI } from './lib/state';
 function App() {
   const { showUserConfig, showAgentEdit } = useUI();
   const [apiKey, setApiKey] = useState<string>('');
+  
+  const currentApiKey = apiKey;
 
   const handleApiKeySubmit = (key: string) => {
     setApiKey(key);
   };
 
-  // Show API key input if no API key is available
-  if (!apiKey) {
-    return <ApiKeyInput onApiKeySubmit={handleApiKeySubmit} />;
-  }
-
   return (
-    <div className="App">
-      <LiveAPIProvider apiKey={apiKey}>
-        <ErrorScreen />
-        <Header />
+    <MicrophoneProvider>
+      {/* Show API key input ONLY if no environment variable is set */}
+      {!currentApiKey ? (
+        <ApiKeyInput onApiKeySubmit={handleApiKeySubmit} />
+      ) : (
+        <div className="App">
+          <LiveAPIProvider apiKey={currentApiKey}>
+            <ErrorScreen />
+            <Header />
 
-        {showUserConfig && <UserSettings />}
-        {showAgentEdit && <AgentEdit />}
-        <div className="streaming-console">
-          <main>
-            <div className="main-app-area">
-              <KeynoteCompanion />
+            {showUserConfig && <UserSettings />}
+            {showAgentEdit && <AgentEdit />}
+            <div className="streaming-console">
+              <main>
+                <div className="main-app-area">
+                  <KeynoteCompanion />
+                </div>
+
+                <ControlTray></ControlTray>
+              </main>
             </div>
-
-            <ControlTray></ControlTray>
-          </main>
+          </LiveAPIProvider>
         </div>
-      </LiveAPIProvider>
-    </div>
+      )}
+    </MicrophoneProvider>
   );
 }
 
