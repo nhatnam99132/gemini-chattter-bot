@@ -27,19 +27,9 @@ const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
       return;
     }
 
-    // Check if microphone API is available
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.warn('Microphone API not available, proceeding without mic test');
-      setError('');
-      onApiKeySubmit(apiKey.trim());
-      return;
-    }
-
     // Test microphone permissions before proceeding
     navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        // Stop the stream immediately as we're just testing permission
-        stream.getTracks().forEach(track => track.stop());
+      .then(() => {
         setError('');
         onApiKeySubmit(apiKey.trim());
       })
@@ -59,7 +49,7 @@ const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
         <div className="api-key-header">
           <h1>🤖 Gemini Chatbot</h1>
           <p>Enter your Gemini API Key to get started</p>
-          <p className="mic-notice">📢 Voice chat requires microphone access (will be requested)</p>
+          <p className="mic-notice">📢 This app requires microphone access for voice chat</p>
         </div>
         
         <form onSubmit={handleSubmit} className="api-key-form">
