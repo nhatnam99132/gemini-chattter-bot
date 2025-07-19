@@ -27,16 +27,8 @@ const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
       return;
     }
 
-    // Test microphone permissions before proceeding
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(() => {
-        setError('');
-        onApiKeySubmit(apiKey.trim());
-      })
-      .catch((err) => {
-        console.error('Microphone permission error:', err);
-        setError('Microphone permission is required for voice chat. Please allow microphone access and try again.');
-      });
+    setError('');
+    onApiKeySubmit(apiKey.trim());
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +41,6 @@ const ApiKeyInput = ({ onApiKeySubmit }: ApiKeyInputProps) => {
         <div className="api-key-header">
           <h1>🤖 Gemini Chatbot</h1>
           <p>Enter your Gemini API Key to get started</p>
-          <p className="mic-notice">📢 This app requires microphone access for voice chat</p>
         </div>
         
         <form onSubmit={handleSubmit} className="api-key-form">
