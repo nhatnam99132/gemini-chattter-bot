@@ -8,9 +8,9 @@ This contains everything you need to run your app locally.
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
+3. Enter your Gemini API key in the input screen when prompted
 
 ## Run with Docker
 
@@ -21,17 +21,16 @@ This contains everything you need to run your app locally.
    docker build -t chatterbots .
    ```
 
-2. Run the container with your GEMINI_API_KEY:
+2. Run the container:
    ```bash
-   docker run -d -p 5000:5000 -e GEMINI_API_KEY=your_api_key_here chatterbots
+   docker run -d -p 5000:5000 chatterbots
    ```
 
-3. Access the application at `http://localhost:5000`
+3. Access the application at `http://localhost:5000` and enter your API key when prompted
 
 ### Docker Commands
 
 - **Build:** `docker build -t chatterbots .`
-- **Run:** `docker run -d -p 5000:5000 -e GEMINI_API_KEY=your_key chatterbots`
-- **Run with env file:** `docker run -d -p 5000:5000 --env-file .env.local chatterbots`
+- **Run:** `docker run -d -p 5000:5000 chatterbots`
 - **Stop container:** `docker stop <container_id>`
 - **View running containers:** `docker ps`

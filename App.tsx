@@ -18,21 +18,16 @@
  * limitations under the License.
  */
 
+import { useState } from 'react';
 import AgentEdit from './components/AgentEdit';
+import ApiKeyInput from './components/ApiKeyInput';
 import ControlTray from './components/console/control-tray/ControlTray';
 import ErrorScreen from './components/demo/ErrorSreen';
 import KeynoteCompanion from './components/demo/keynote-companion/KeynoteCompanion';
 import Header from './components/Header';
 import UserSettings from './components/UserSettings';
 import { LiveAPIProvider } from './contexts/LiveAPIContext';
-import { useUI, useUser } from './lib/state';
-
-const API_KEY = process.env.GEMINI_API_KEY as string;
-if (typeof API_KEY !== 'string') {
-  throw new Error(
-    'Missing required environment variable: REACT_APP_GEMINI_API_KEY'
-  );
-}
+import { useUI } from './lib/state';
 
 /**
  * Main application component that provides a streaming interface for Live API.
@@ -40,9 +35,20 @@ if (typeof API_KEY !== 'string') {
  */
 function App() {
   const { showUserConfig, showAgentEdit } = useUI();
+  const [apiKey, setApiKey] = useState<string>('');
+
+  const handleApiKeySubmit = (key: string) => {
+    setApiKey(key);
+  };
+
+  // Show API key input if no API key is available
+  if (!apiKey) {
+    return <ApiKeyInput onApiKeySubmit={handleApiKeySubmit} />;
+  }
+
   return (
     <div className="App">
-      <LiveAPIProvider apiKey={API_KEY}>
+      <LiveAPIProvider apiKey={apiKey}>
         <ErrorScreen />
         <Header />
 
